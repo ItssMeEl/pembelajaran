@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Kuis Hak & Kewajiban Warga Negara</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    /* Reset */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #4c8bf5, #1e3c72);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    #app {
+      background: #162c5d;
+      border-radius: 12px;
+      width: 350px;
+      max-width: 100%;
+      height: 600px;
+      max-height: 100vh;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #1a407c;
+      padding: 20px 15px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    main {
+      flex-grow: 1;
+      padding: 20px 25px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .question-number {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+    .question-text {
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+      line-height: 1.3;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    label {
+      background: #294a96;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      user-select: none;
+      font-size: 1rem;
+      box-shadow: inset 0 0 0 2px transparent;
+    }
+    label:hover {
+      background: #3f63b0;
+    }
+    input[type="radio"],
+    input[type="checkbox"] {
+      display: none;
+    }
+    input[type="radio"]:checked + label,
+    input[type="checkbox"]:checked + label {
+      background: #73a8ff;
+      color: #0f1c43;
+      font-weight: 600;
+      box-shadow: inset 0 0 0 2px #144eec;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+      outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+    input[type="text"]:focus {
+      box-shadow: 0 0 8px 2px #3a69ff;
+      background: #eef4ff;
+      color: #0c1a3f;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: auto;
+      padding: 15px 25px;
+      background: #1a407c;
+      flex-shrink: 0;
+    }
+    button {
+      background: #294a96;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+      user-select: none;
+      flex: 1;
+      margin: 0 5px;
+    }
+    button:disabled {
+      background: #5876bd88;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    button:hover:not(:disabled) {
+      background: #3f63b0;
+    }
+    .result-container {
+      text-align: center;
+      padding: 0 20px 20px;
+      font-size: 1.1rem;
+      line-height: 1.4;
+      color: #dce6ff;
+      overflow-y: auto;
+      max-height: 500px;
+    }
+    .score {
+      font-size: 1.8rem;
+      color: #a4d96c;
+      font-weight: 700;
+      margin-bottom: 15px;
+      user-select: none;
+    }
+    .answer-key {
+      text-align: left;
+      background: #2d4b90;
+      border-radius: 10px;
+      padding: 14px 16px;
+      max-height: 300px;
+      overflow-y: auto;
+      user-select: text;
+    }
+    .answer-key h3 {
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      font-size: 1.2rem;
+    }
+    .answer-key ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .answer-key li {
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    /* Scrollbar for main and answer-key */
+    main::-webkit-scrollbar,
+    .answer-key::-webkit-scrollbar,
+    .result-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    main::-webkit-scrollbar-thumb,
+    .answer-key::-webkit-scrollbar-thumb,
+    .result-container::-webkit-scrollbar-thumb {
+      background-color: rgba(115, 168, 255, 0.4);
+      border-radius: 3px;
+    }
+    main::-webkit-scrollbar-track,
+    .answer-key::-webkit-scrollbar-track,
+    .result-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" role="main" aria-live="polite">
+    <header>
+      Kuis Hak &amp; Kewajiban Warga Negara
+    </header>
+    <main>
+      <!-- Kuis Content Inserted by JS -->
+    </main>
+    <div class="buttons">
+      <button id="prevBtn" type="button" disabled aria-label="Pertanyaan sebelumnya">Sebelumnya</button>
+      <button id="nextBtn" type="button" aria-label="Pertanyaan berikutnya">Berikutnya</button>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        type: 'multiple',
+        question: '1. Apa yang dimaksud dengan hak asasi manusia?',
+        options: [
+          'Hak yang diberikan oleh pemerintah',
+          'Hak yang dimiliki setiap individu sejak lahir',
+          'Hak yang hanya dimiliki oleh warga negara tertentu',
+          'Hak yang dapat dicabut kapan saja'
+        ],
+        answer: 1
+      },
+      {
+        type: 'multiple',
+        question: '2. Salah satu kewajiban warga negara adalah:',
+        options: [
+          'Memilih pemimpin dalam pemilu',
+          'Mengabaikan hukum yang berlaku',
+          'Menolak untuk membayar pajak',
+          'Menghindari pendidikan'
+        ],
+        answer: 0
+      },
+      {
+        type: 'multiple',
+        question: '3. Hak untuk mendapatkan pendidikan diatur dalam:',
+        options: [
+          'UUD 1945',
+          'UU No. 12 Tahun 2011',
+          'UU No. 23 Tahun 2002',
+          'UU No. 40 Tahun 2009'
+        ],
+        answer: 0
+      },
+      {
+        type: 'truefalse',
+        question: '4. Warga negara tidak memiliki hak untuk menyampaikan pendapat.',
+        options: ['Benar', 'Salah'],
+        answer: 1
+      },
+      {
+        type: 'truefalse',
+        question: '5. Setiap warga negara wajib membayar pajak sesuai dengan ketentuan yang berlaku.',
+        options: ['Benar', 'Salah'],
+        answer: 0
+      },
+      {
+        type: 'short',
+        question: '6. Sebutkan dua contoh hak warga negara yang dijamin oleh konstitusi!',
+        answerKeywords: ['hidup', 'pendidikan', 'hak untuk hidup', 'hak mendapatkan pendidikan']
+      },
+      {
+        type: 'short',
+        question: '7. Apa kewajiban warga negara dalam menjaga keamanan dan ketertiban masyarakat?',
+        answerKeywords: ['mengikuti kegiatan keamanan', 'melaporkan tindakan kriminal', 'menjaga keamanan', 'menjaga ketertiban']
+      }
+    ];
+
+    const app = document.getElementById('app');
+    const main = app.querySelector('main');
+    const prevBtn = app.querySelector('#prevBtn');
+    const nextBtn = app.querySelector('#nextBtn');
+
+    let currentQuestion = 0;
+    let answers = new Array(quizData.length).fill(null);
+
+    function createMultipleChoice(questionData, qIndex) {
+      const container = document.createElement('div');
+      container.setAttribute('role', 'group');
+      container.setAttribute('aria-labelledby', 'question-text');
+      container.classList.add('question-block');
+
+      const qNumber = document.createElement('div');
+      qNumber.className = 'question-number';
+      qNumber.textContent = `Pertanyaan ${qIndex + 1} dari ${quizData.length}`;
+      container.appendChild(qNumber);
+
+      const qText = document.createElement('div');
+      qText.className = 'question-text';
+      qText.id = 'question-text';
+      qText.textContent = questionData.question;
+      container.appendChild(qText);
+
+      const optionsContainer = document.createElement('div');
+      optionsContainer.className = 'options';
+
+      questionData.options.forEach((option, i) => {
+        const optionId = `q${qIndex}option${i}`;
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = `question${qIndex}`;
+        input.id = optionId;
+        input.value = i;
+        if (answers[qIndex] === i) input.checked = true;
+
+        const label = document.createElement('label');
+        label.htmlFor = optionId;
+        label.textContent = option;
+
+        optionsContainer.appendChild(input);
+        optionsContainer.appendChild(label);
+      });
+
+      container.appendChild(optionsContainer);
+      return container;
+    }
+
+    function createTrueFalse(questionData, qIndex) {
+      // True/False is a special case of multiple choice with options: Benar/Salah
+      return createMultipleChoice(questionData, qIndex);
+    }
+
+    function createShortAnswer(questionData, qIndex) {
+      const container = document.createElement('div');
+      container.classList.add('question-block');
+
+      const qNumber = document.createElement('div');
+      qNumber.className = 'question-number';
+      qNumber.textContent = `Pertanyaan ${qIndex + 1} dari ${quizData.length}`;
+      container.appendChild(qNumber);
+
+      const qText = document.createElement('div');
+      qText.className = 'question-text';
+      qText.textContent = questionData.question;
+      container.appendChild(qText);
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = `question${qIndex}`;
+      input.id = `q${qIndex}input`;
+      input.placeholder = 'Tulis jawaban singkat kamu di sini';
+      if (answers[qIndex]) input.value = answers[qIndex];
+      container.appendChild(input);
+
+      return container;
+    }
+
+    function renderQuestion(index) {
+      main.innerHTML = '';
+      const questionData = quizData[index];
+      let questionElem;
+      switch(questionData.type) {
+        case 'multiple':
+          questionElem = createMultipleChoice(questionData, index);
+          break;
+        case 'truefalse':
+          questionElem = createTrueFalse(questionData, index);
+          break;
+        case 'short':
+          questionElem = createShortAnswer(questionData, index);
+          break;
+        default:
+          questionElem = document.createElement('div');
+          questionElem.textContent = 'Tipe pertanyaan tidak dikenal.';
+      }
+
+      main.appendChild(questionElem);
+
+      prevBtn.disabled = index === 0;
+      nextBtn.textContent = index === quizData.length - 1 ? 'Submit' : 'Berikutnya';
+
+      // Focus first focusable input for accessibility
+      const firstInput = main.querySelector('input');
+      if (firstInput) firstInput.focus();
+    }
+
+    function collectAnswer(index) {
+      const questionData = quizData[index];
+
+      if (questionData.type === 'short') {
+        const input = main.querySelector('input[type=text]');
+        if (input) {
+          answers[index] = input.value.trim();
+        }
+      } else {
+        const selectedOption = main.querySelector('input[type=radio]:checked');
+        if (selectedOption) {
+          answers[index] = parseInt(selectedOption.value, 10);
+        } else {
+          answers[index] = null;
+        }
+      }
+    }
+
+    function checkAnswers() {
+      let score = 0;
+      let feedback = [];
+
+      quizData.forEach((q, i) => {
+        let correct = false;
+
+        if (q.type === 'short') {
+          if (!answers[i]) return feedback.push({index:i, correct:false});
+          const lowerAnswer = answers[i].toLowerCase();
+          correct = q.answerKeywords.some(keyword => lowerAnswer.includes(keyword));
+          if (correct) score++;
+          feedback.push({index:i, correct});
+        } else {
+          correct = answers[i] === q.answer;
+          if (correct) score++;
+          feedback.push({index:i, correct});
+        }
+      });
+
+      return {score, feedback};
+    }
+
+    function renderResult() {
+      main.innerHTML = '';
+
+      const {score, feedback} = checkAnswers();
+
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'result-container';
+
+      const scoreElem = document.createElement('div');
+      scoreElem.className = 'score';
+      scoreElem.textContent = `Skor kamu: ${score} dari ${quizData.length}`;
+      resultDiv.appendChild(scoreElem);
+
+      // Provide answer key and explanations
+      const answerKey = document.createElement('div');
+      answerKey.className = 'answer-key';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = 'Kunci Jawaban & Jawaban Contoh';
+      answerKey.appendChild(h3);
+
+      const ul = document.createElement('ul');
+      quizData.forEach((q, i) => {
+        const li = document.createElement('li');
+        let correctAnswerText = '';
+        if (q.type === 'short') {
+          correctAnswerText = q.answerKeywords.map(k => `"${k}"`).join(', ');
+        } else {
+          correctAnswerText = q.options[q.answer];
+        }
+        // show correct or incorrect mark:
+        const mark = feedback[i].correct ? '✔️' : '❌';
+        li.innerHTML = `<strong>Pertanyaan ${i + 1}:</strong> ${mark} <br> Jawaban benar: <em>${correctAnswerText}</em>`;
+        ul.appendChild(li);
+      });
+
+      answerKey.appendChild(ul);
+      resultDiv.appendChild(answerKey);
+
+      main.appendChild(resultDiv);
+
+      prevBtn.disabled = true;
+      nextBtn.textContent = 'Ulangi';
+      nextBtn.focus();
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentQuestion > 0) {
+        collectAnswer(currentQuestion);
+        currentQuestion--;
+        renderQuestion(currentQuestion);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      collectAnswer(currentQuestion);
+      if (currentQuestion < quizData.length - 1) {
+        currentQuestion++;
+        renderQuestion(currentQuestion);
+      } else {
+        // Submit pressed
+        // Check if all answered
+        const notAnswered = answers.some(ans => ans === null || ans === '');
+        if (notAnswered) {
+          alert('Mohon jawab semua pertanyaan sebelum submit.');
+          return;
+        }
+        renderResult();
+      }
+    });
+
+    // Restart quiz on "Ulangi" click
+    nextBtn.addEventListener('click', () => {
+      if (nextBtn.textContent === 'Ulangi') {
+        answers = new Array(quizData.length).fill(null);
+        currentQuestion = 0;
+        renderQuestion(currentQuestion);
+      }
+    });
+
+    // Initial render
+    renderQuestion(currentQuestion);
+  </script>
+</body>
+</html>
+
